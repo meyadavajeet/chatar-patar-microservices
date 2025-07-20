@@ -43,7 +43,22 @@ Changes required in tsconfig.json file
  npm i redis
  npm i -D @types/redis
  ```
+# Install Docker and run the RabbitMQ using docker 
 
+```bash
+docker run -d --hostname rabbitmq-host --name rabbitmq-container -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_DEFAULT_PASS=admin123 -p 5672:5672 -p 15672:15672  rabbitmq:3-management
+```
+- login in to browser using http://localhost:15672
+- username - admin
+- password - admin123
+
+- Package required for the connection of nodejs with rabbitmq
+[amqplib documentation](https://www.cloudamqp.com/docs/nodejs.html?utm_source=google&utm_medium=cpc&utm_campaign=19669834282&utm_term=amqplib&gad_source=1&gad_campaignid=19669834282&gbraid=0AAAAApKbGlkLME795MnE5xS_0ZZSngjZ1&gclid=Cj0KCQjwhO3DBhDkARIsANxrhTpwnIa7a1NFuE41M0f5pynzXRXy35FEYE0Xnn51AXAwfM3HG74T9WMaAmefEALw_wcB)
+
+```bash
+npm i amqplib
+npm i -D @types/amqplib
+```
 
 
 
