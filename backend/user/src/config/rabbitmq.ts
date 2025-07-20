@@ -1,4 +1,4 @@
-import ampq from "amqplib";
+import amqp from "amqplib";
 import {
   RABBIT_MQ_HOSTNAME,
   RABBIT_MQ_PASSWORD,
@@ -6,11 +6,11 @@ import {
   RABBIT_MQ_USERNAME,
 } from "./constants.js";
 
-let channel: ampq.Channel;
+let channel: amqp.Channel;
 
 export const connectRabbitMQ = async () => {
   try {
-    const _connection = await ampq.connect({
+    const _connection = await amqp.connect({
       protocol: "amqp",
       hostname: RABBIT_MQ_HOSTNAME,
       port:
