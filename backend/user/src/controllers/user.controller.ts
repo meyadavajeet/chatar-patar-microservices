@@ -32,3 +32,15 @@ export const loginUser = TryCatch(async (req, res) => {
     message: "OTP sent to you mail",
   });
 });
+
+export const verifyLoginOTP = TryCatch(async (req, res) => {
+  const { email, otp: enteredOTP } = req.body;
+
+  if (!email || !enteredOTP) {
+    res.status(400).json({
+      message: "Email and OTP Required",
+    });
+    return;
+    
+  }
+});
