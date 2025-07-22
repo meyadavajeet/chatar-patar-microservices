@@ -1,6 +1,10 @@
+import { ObjectId } from "mongoose";
+import { generateToken } from "../config/generate.jwt.token.js";
 import { publishToQueue } from "../config/rabbitmq.js";
 import redisClient from "../config/redis.js";
 import TryCatch from "../config/TryCatch.js";
+import { User } from "../models/user.model.js";
+import { capitalizeFirstLetter } from "../utils/common.js";
 
 export const loginUser = TryCatch(async (req, res) => {
   const { email } = req.body;
@@ -41,6 +45,37 @@ export const verifyLoginOTP = TryCatch(async (req, res) => {
       message: "Email and OTP Required",
     });
     return;
-    
   }
+
+  const otpKey = `otp:${email}`;
+  const storedOTP = await redisClient.get(otpKey);
+  if (!storedOTP || storedOTP !== enteredOTP) {
+    res.status(400).json({
+      message: "Invalid or Expired OTP",
+    });
+    return;
+  }
+
+  await redisClient.del(otpKey);
+
+  let user = await User.findOne({ email: email });
+  if (!user) {
+    // create user
+    const parts = email.split("@");
+    const name = capitalizeFirstLetter(parts[0]);
+    user = await User.create({ name, email });
+  }
+  if (!user) {
+    res.status(500).json({
+      message: "Unable to create user",
+    });
+    return;
+  }
+  const token = generateToken(user._id as ObjectId);
+
+  return res.json({
+    message: "User verified.",
+    user,
+    token,
+  });
 });
