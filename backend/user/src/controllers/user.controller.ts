@@ -87,3 +87,38 @@ export const myProfile = TryCatch(
     res.json(user);
   }
 );
+
+export const updateName = TryCatch(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const user = await User.findById(req.user?._id);
+    if (!user) {
+      return res.status(404).json({
+        message: "Please login",
+      });
+    }
+
+    user.name = req.body.name;
+    await user.save();
+
+    const token = generateToken(user);
+    return res.status(200).json({
+      message: "User Updated",
+      user,
+      token,
+    });
+  }
+);
+
+export const getAllUsers = TryCatch(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const users = await User.find();
+    return res.json(users);
+  }
+);
+
+export const getUserById = TryCatch(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const user = await User.findById(req.params.id);
+    return res.json(user);
+  }
+);
