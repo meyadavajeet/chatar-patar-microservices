@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "./constants.js";
 import { ObjectId } from "mongoose";
+import { IUser } from "../models/user.model.js";
 
-export const generateToken = (_id: ObjectId) => {
-  return jwt.sign({ _id }, JWT_SECRET as string, { expiresIn: "15days" });
+
+export const generateToken = (user : any) => {
+  return jwt.sign({ user }, JWT_SECRET as string, { expiresIn: "15days" });
 };

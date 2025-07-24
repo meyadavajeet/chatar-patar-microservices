@@ -5,6 +5,8 @@ import redisClient from "../config/redis.js";
 import TryCatch from "../config/TryCatch.js";
 import { User } from "../models/user.model.js";
 import { capitalizeFirstLetter } from "../utils/common.js";
+import { AuthenticatedRequest } from "../middlewares/isAuthenticated.middleware.js";
+import { Response } from "express";
 
 export const loginUser = TryCatch(async (req, res) => {
   const { email } = req.body;
@@ -71,11 +73,17 @@ export const verifyLoginOTP = TryCatch(async (req, res) => {
     });
     return;
   }
-  const token = generateToken(user._id as ObjectId);
-
+  const token = generateToken(user);
   return res.json({
     message: "User verified.",
     user,
     token,
   });
 });
+
+export const myProfile = TryCatch(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const user = req.user;
+    res.json(user);
+  }
+);
