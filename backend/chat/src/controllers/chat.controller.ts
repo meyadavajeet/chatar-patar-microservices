@@ -6,5 +6,6 @@ export const createNewChat = TryCatch(
   async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?._id;
     const {otherUserId} = req.body;
+    
   }
 );
