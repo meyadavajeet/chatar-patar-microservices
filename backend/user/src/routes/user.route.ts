@@ -15,7 +15,7 @@ router.post("/verify-otp", verifyLoginOTP);
 
 router.get("/me", isAuthenticated, myProfile);
 router.get("/all", isAuthenticated, getAllUsers);
-router.get("/:id", isAuthenticated, getUserById);
+router.get("/:id", getUserById);
 router.put("/update-name", isAuthenticated, updateName);
 
 export default router;
