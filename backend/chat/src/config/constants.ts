@@ -13,3 +13,8 @@ export const RABBIT_MQ_PASSWORD = process.env.RABBIT_MQ_PASSWORD;
 
 export const JWT_SECRET = process.env.JWT_SECRET;
 export const USER_SERVICE = process.env.USER_SERVICE;
+
+// cloudanary env variable
+export const CLOUD_NAME = process.env.CLOUDANARY_CLOUD_NAME;
+export const API_KEY = process.env.CLOUDANARY_API_KEY;
+export const API_SECRET = process.env.CLOUDANARY_API_SECRET;

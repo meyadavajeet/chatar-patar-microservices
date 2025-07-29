@@ -93,3 +93,11 @@ export const getAllChats = TryCatch(
     return res.json({ chats: chatWithUserData });
   }
 );
+
+export const sendMessage = TryCatch(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const senderId = req.user?._id;
+    const {chatId , text } = req.body;
+    const imageFile = req.file;
+  }
+);
