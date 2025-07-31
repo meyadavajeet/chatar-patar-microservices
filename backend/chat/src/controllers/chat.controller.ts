@@ -97,7 +97,93 @@ export const getAllChats = TryCatch(
 export const sendMessage = TryCatch(
   async (req: AuthenticatedRequest, res: Response) => {
     const senderId = req.user?._id;
-    const {chatId , text } = req.body;
+    const { chatId, text } = req.body;
     const imageFile = req.file;
+    if (!senderId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+    if (!chatId) {
+      return res.status(400).json({
+        message: "ChatId is missing",
+      });
+    }
+    if (!text && !imageFile) {
+      return res.status(400).json({
+        message: "Either text or image is required",
+      });
+    }
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({
+        message: "Chat not found",
+      });
+    }
+
+    const isValidUserOfChat = chat.users.some(
+      (userId) => userId.toString() === senderId.toString()
+    );
+
+    if (!isValidUserOfChat) {
+      return res.status(401).json({
+        message: "You are not a participant of this chat",
+      });
+    }
+
+    const otherUserId = chat.users.find(
+      (userId) => userId.toString() !== senderId.toString()
+    );
+    if (!otherUserId) {
+      return res.status(400).json({
+        message: "Other userId is missing",
+      });
+    }
+
+    /**
+     * TODO: SOCKET SETUP
+     */
+
+    let messageData: any = {
+      chatId: chatId,
+      sender: senderId,
+      seen: false,
+      seenAt: undefined,
+    };
+    if (imageFile) {
+      messageData.image = {
+        url: imageFile.path,
+        publicId: imageFile.filename,
+      };
+      messageData.messageType = "image";
+      messageData.text = text || "";
+    } else {
+      messageData.text = text;
+      messageData.messageType = "text";
+    }
+
+    const message = new MessagesModel(messageData);
+    const savedMessage = await message.save();
+    const latestMessage = imageFile ? "📷 Images" : text;
+
+    await Chat.findByIdAndUpdate(
+      chatId,
+      {
+        latestMessage: {
+          text: latestMessage,
+          sender: senderId,
+        },
+        updatedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    // TODO : emit to socket
+
+    res.status(201).json({
+      message: savedMessage,
+      sender: senderId,
+    });
   }
 );
