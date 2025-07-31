@@ -187,3 +187,97 @@ export const sendMessage = TryCatch(
     });
   }
 );
+
+export const getMessagesByChatId = TryCatch(
+  async (req: AuthenticatedRequest, res) => {
+    const userId = req.user?._id;
+    const { chatId } = req.params;
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized user",
+      });
+    }
+    if (!chatId) {
+      return res.status(400).json({
+        message: "ChatId is required",
+      });
+    }
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({
+        message: "Chat not found",
+      });
+    }
+
+    const isValidUserOfChat = chat.users.some(
+      (userId) => userId.toString() === userId.toString()
+    );
+
+    if (!isValidUserOfChat) {
+      return res.status(401).json({
+        message: "You are not a participant of this chat",
+      });
+    }
+
+    const markMessageToSeen = await MessagesModel.find({
+      chatId: chatId,
+      sender: { $ne: userId },
+      seen: false,
+    });
+    // if (markMessageToSeen.length > 0) {
+    //   await MessagesModel.updateMany(
+    //     {
+    //       chatId: chatId,
+    //       sender: { $ne: userId },
+    //       seen: false,
+    //     },
+    //     {
+    //       seen: true,
+    //       seenAt: new Date(),
+    //     }
+    //   );
+    // }
+    if (markMessageToSeen.length > 0) {
+      const ids = markMessageToSeen.map((msg) => msg._id);
+      await MessagesModel.updateMany(
+        { _id: { $in: ids } },
+        { $set: { seen: true, seenAt: new Date() } }
+      );
+    }
+
+    const messages = await MessagesModel.find({ chatId }).sort({
+      createdAt: 1,
+    });
+
+    const otherUserId = chat.users.find((id) => id !== userId);
+    if (!otherUserId) {
+      return res.status(400).json({ message: "No other User" });
+    }
+
+    try {
+      const { data } = await axios.get(
+        `${USER_SERVICE}/api/v1/users/${otherUserId}`
+      );
+      if (!data) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // TODO: Socket Work work with frontend
+
+      return res.status(200).json({
+        messages,
+        user: data,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(200).json({
+        messages,
+        user: {
+          _id: otherUserId,
+          name: "Unknown User",
+        },
+      });
+    }
+  }
+);

@@ -2,6 +2,7 @@ import express from "express";
 import {
   createNewChat,
   getAllChats,
+  getMessagesByChatId,
   sendMessage,
 } from "../controllers/chat.controller.js";
 import { isAuthenticated } from "../middlewares/isAuthenticated.middleware.js";
@@ -17,5 +18,7 @@ router.post(
   upload.single("image"),
   sendMessage
 );
+
+router.get("/message/:chatId", isAuthenticated, getMessagesByChatId);
 
 export default router;
